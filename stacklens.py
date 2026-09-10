@@ -16,18 +16,25 @@ st.set_page_config(
     layout="wide",
 )
 
-# ---------------------------------------------------------------------------
-# Fingerprints (subset of Wappalyzer-style rules)
-# Each rule: name, categories, optional headers/cookies/html/scripts/meta
-# confidence 0-100; version via capture group if present
-# ---------------------------------------------------------------------------
-
 FINGERPRINTS = [
-    # CMS / platforms
     {"name": "WordPress", "cats": ["CMS", "Blogs"],
-     "html": [r"wp-content", r"wp-includes", r'<meta[^>]+name=["\']generator["\'][^>]+WordPress'],
+     "html": [r"wp-content", r"wp-includes", r"wp-json"],
      "headers": {"x-powered-by": r"WP Engine"},
      "meta_generator": r"WordPress(?:\s([\d.]+))?"},
+    {"name": "WooCommerce", "cats": ["Ecommerce", "WordPress plugins"],
+     "html": [r"woocommerce", r"wc-add-to-cart", r"wp-content/plugins/woocommerce"]},
+    {"name": "Yoast SEO", "cats": ["SEO", "WordPress plugins"],
+     "html": [r"yoast", r"YoastSEO", r"wp-content/plugins/wordpress-seo"]},
+    {"name": "Elementor", "cats": ["Page builders", "WordPress plugins"],
+     "html": [r"elementor", r"wp-content/plugins/elementor"]},
+    {"name": "Contact Form 7", "cats": ["WordPress plugins"],
+     "html": [r"wpcf7", r"contact-form-7"]},
+    {"name": "Jetpack", "cats": ["WordPress plugins"],
+     "html": [r"/wp-content/plugins/jetpack/"]},
+    {"name": "Gravity Forms", "cats": ["WordPress plugins"],
+     "html": [r"gravityforms", r"gform_wrapper"]},
+    {"name": "WP Rocket", "cats": ["Caching", "WordPress plugins"],
+     "html": [r"wp-rocket"]},
     {"name": "Shopify", "cats": ["Ecommerce", "PaaS"],
      "html": [r"cdn\.shopify\.com", r"Shopify\.theme"],
      "headers": {"x-shopid": r".+", "x-shopify-stage": r".+"},
@@ -54,12 +61,9 @@ FINGERPRINTS = [
     {"name": "Magento", "cats": ["Ecommerce"],
      "html": [r"mage/cookies", r"Magento_"],
      "cookies": {"mage-cache-sessid": r".+"}},
-    {"name": "WooCommerce", "cats": ["Ecommerce"],
-     "html": [r"woocommerce", r"wc-add-to-cart"]},
     {"name": "BigCommerce", "cats": ["Ecommerce"],
      "html": [r"cdn\d*\.bigcommerce\.com", r"stencil"]},
 
-    # Frameworks
     {"name": "React", "cats": ["JavaScript frameworks"],
      "html": [r"data-reactroot", r"react-dom", r"__NEXT_DATA__"],
      "scripts": [r"react(?:[-.]dom)?(?:\.min)?\.js"]},
@@ -85,75 +89,81 @@ FINGERPRINTS = [
      "cookies": {"csrftoken": r".+"},
      "html": [r"csrfmiddlewaretoken"]},
     {"name": "Laravel", "cats": ["Web frameworks"],
-     "cookies": {"laravel_session": r".+"},
-     "headers": {"x-powered-by": r"PHP"}},
+     "cookies": {"laravel_session": r".+", "XSRF-TOKEN": r".+"}},
     {"name": "Ruby on Rails", "cats": ["Web frameworks"],
-     "headers": {"x-runtime": r".+", "x-request-id": r".+"},
-     "cookies": {"_session_id": r".+"},
+     "headers": {"x-runtime": r".+"},
      "html": [r"csrf-param"]},
     {"name": "Express", "cats": ["Web frameworks"],
      "headers": {"x-powered-by": r"Express"}},
     {"name": "ASP.NET", "cats": ["Web frameworks"],
      "headers": {"x-aspnet-version": r"([\d.]+)", "x-powered-by": r"ASP\.NET"},
-     "cookies": {"ASP.NET_SessionId": r".+"}},
+     "cookies": {"ASP.NET_SessionId": r".+"},
+     "html": [r"__VIEWSTATE"]},
     {"name": "Flask", "cats": ["Web frameworks"],
-     "cookies": {"session": r".+"},
      "headers": {"server": r"Werkzeug"}},
 
-    # Languages / runtimes
     {"name": "PHP", "cats": ["Programming languages"],
      "headers": {"x-powered-by": r"PHP(?:/([\d.]+))?"},
-     "cookies": {"PHPSESSID": r".+"}},
+     "cookies": {"PHPSESSID": r".+"},
+     "html": [r"\.php(?:\?|#|\"|')"]},
     {"name": "Node.js", "cats": ["Programming languages"],
-     "headers": {"x-powered-by": r"Express|Next\.js"}},
+     "headers": {"x-powered-by": r"Express|Next\.js|NestJS"}},
+    {"name": "Python", "cats": ["Programming languages"],
+     "headers": {"server": r"gunicorn|uwsgi|Werkzeug"}},
+    {"name": "Ruby", "cats": ["Programming languages"],
+     "headers": {"x-powered-by": r"Phusion Passenger", "x-runtime": r".+"}},
+    {"name": "Java", "cats": ["Programming languages"],
+     "headers": {"x-powered-by": r"Servlet|JSP|Java", "server": r"Apache-Coyote|Tomcat"},
+     "cookies": {"JSESSIONID": r".+"}},
 
-    # JS libraries
+    {"name": "MySQL", "cats": ["Databases"]},
+    {"name": "PostgreSQL", "cats": ["Databases"],
+     "html": [r"PostgreSQL"]},
+    {"name": "MongoDB", "cats": ["Databases"],
+     "html": [r"mongodb"]},
+    {"name": "Redis", "cats": ["Databases", "Caching"],
+     "html": [r"\bredis\b"]},
+
     {"name": "jQuery", "cats": ["JavaScript libraries"],
      "scripts": [r"jquery[-.]([\d.]+)(?:\.min)?\.js", r"jquery(?:\.min)?\.js"]},
     {"name": "jQuery UI", "cats": ["JavaScript libraries"],
      "scripts": [r"jquery-ui"]},
     {"name": "Lodash", "cats": ["JavaScript libraries"],
      "scripts": [r"lodash(?:\.min)?\.js"]},
-    {"name": "Underscore.js", "cats": ["JavaScript libraries"],
-     "scripts": [r"underscore(?:\.min)?\.js"]},
-    {"name": "Moment.js", "cats": ["JavaScript libraries"],
-     "scripts": [r"moment(?:\.min)?\.js"]},
     {"name": "Bootstrap", "cats": ["UI frameworks"],
-     "html": [r"bootstrap(?:\.min)?\.(?:css|js)", r"class=[\"'][^\"']*\b(?:container|row|col-md-)"],
+     "html": [r"bootstrap(?:\.min)?\.(?:css|js)"],
      "scripts": [r"bootstrap(?:\.bundle)?(?:\.min)?\.js"]},
     {"name": "Tailwind CSS", "cats": ["UI frameworks"],
-     "html": [r"tailwind", r"cdn\.tailwindcss\.com"]},
+     "html": [r"cdn\.tailwindcss\.com", r"tailwindcss"]},
     {"name": "Font Awesome", "cats": ["Font scripts"],
-     "html": [r"font-awesome", r"fontawesome"],
-     "scripts": [r"fontawesome"]},
+     "html": [r"font-awesome", r"fontawesome"]},
     {"name": "Google Fonts", "cats": ["Font scripts"],
      "html": [r"fonts\.googleapis\.com", r"fonts\.gstatic\.com"]},
 
-    # Analytics / marketing
     {"name": "Google Analytics", "cats": ["Analytics"],
-     "html": [r"google-analytics\.com/analytics\.js", r"gtag\(|ga\('create'", r"G-[A-Z0-9]+", r"UA-\d+-\d+"],
+     "html": [r"google-analytics\.com/analytics\.js", r"gtag\(", r"G-[A-Z0-9]+", r"UA-\d+-\d+"],
      "cookies": {"_ga": r".+", "_gid": r".+"}},
     {"name": "Google Tag Manager", "cats": ["Tag managers"],
      "html": [r"googletagmanager\.com/gtm\.js", r"GTM-[A-Z0-9]+"]},
     {"name": "Google Ads", "cats": ["Advertising"],
      "html": [r"googleadservices\.com", r"googlesyndication\.com", r"gtag/js\?id=AW-"]},
     {"name": "Hotjar", "cats": ["Analytics"],
-     "html": [r"static\.hotjar\.com", r"hjid"],
+     "html": [r"static\.hotjar\.com"],
      "cookies": {"_hjSession": r".+"}},
     {"name": "Mixpanel", "cats": ["Analytics"],
      "html": [r"cdn\.mxpnl\.com", r"mixpanel"]},
     {"name": "Segment", "cats": ["Analytics"],
-     "html": [r"cdn\.segment\.com", r"analytics\.load"]},
+     "html": [r"cdn\.segment\.com"]},
     {"name": "Amplitude", "cats": ["Analytics"],
-     "html": [r"cdn\.amplitude\.com", r"amplitude"]},
+     "html": [r"cdn\.amplitude\.com"]},
     {"name": "Facebook Pixel", "cats": ["Analytics", "Advertising"],
      "html": [r"connect\.facebook\.net/.+/fbevents", r"fbq\("],
      "cookies": {"_fbp": r".+"}},
     {"name": "HubSpot", "cats": ["Marketing automation", "CRM"],
-     "html": [r"js\.hs-scripts\.com", r"hs-analytics"],
+     "html": [r"js\.hs-scripts\.com"],
      "cookies": {"hubspotutk": r".+"}},
     {"name": "Intercom", "cats": ["Live chat"],
-     "html": [r"widget\.intercom\.io", r"intercomSettings"]},
+     "html": [r"widget\.intercom\.io"]},
     {"name": "Drift", "cats": ["Live chat"],
      "html": [r"js\.driftt\.com"]},
     {"name": "Mailchimp", "cats": ["Marketing automation"],
@@ -161,52 +171,52 @@ FINGERPRINTS = [
     {"name": "Klaviyo", "cats": ["Marketing automation"],
      "html": [r"static\.klaviyo\.com", r"_learnq"]},
 
-    # CDN / hosting / security
-    {"name": "Cloudflare", "cats": ["CDN", "Security"],
+    {"name": "Cloudflare", "cats": ["CDN", "Security", "Hosting"],
      "headers": {"server": r"cloudflare", "cf-ray": r".+", "cf-cache-status": r".+"},
      "cookies": {"__cf_bm": r".+", "cf_clearance": r".+"}},
-    {"name": "Amazon CloudFront", "cats": ["CDN"],
-     "headers": {"via": r"cloudfront", "x-amz-cf-id": r".+", "x-cache": r"Hit from cloudfront"}},
+    {"name": "Amazon CloudFront", "cats": ["CDN", "Hosting"],
+     "headers": {"via": r"cloudfront", "x-amz-cf-id": r".+"}},
     {"name": "Fastly", "cats": ["CDN"],
      "headers": {"via": r"fastly", "x-served-by": r"cache-"}},
     {"name": "Akamai", "cats": ["CDN"],
-     "headers": {"x-akamai-transformed": r".+", "server": r"AkamaiGHost"}},
-    {"name": "Vercel", "cats": ["PaaS", "CDN"],
+     "headers": {"server": r"AkamaiGHost", "x-akamai-transformed": r".+"}},
+    {"name": "Vercel", "cats": ["PaaS", "Hosting", "CDN"],
      "headers": {"x-vercel-id": r".+", "server": r"Vercel", "x-vercel-cache": r".+"}},
-    {"name": "Netlify", "cats": ["PaaS", "CDN"],
+    {"name": "Netlify", "cats": ["PaaS", "Hosting"],
      "headers": {"server": r"Netlify", "x-nf-request-id": r".+"}},
-    {"name": "GitHub Pages", "cats": ["PaaS"],
+    {"name": "GitHub Pages", "cats": ["Hosting"],
      "headers": {"server": r"GitHub.com", "x-github-request-id": r".+"}},
+    {"name": "WP Engine", "cats": ["Hosting"],
+     "headers": {"x-powered-by": r"WP Engine"}},
+    {"name": "Kinsta", "cats": ["Hosting"],
+     "headers": {"x-kinsta-cache": r".+"}},
     {"name": "nginx", "cats": ["Web servers"],
      "headers": {"server": r"nginx(?:/([\d.]+))?"}},
     {"name": "Apache HTTP Server", "cats": ["Web servers"],
      "headers": {"server": r"Apache(?:/([\d.]+))?"}},
     {"name": "IIS", "cats": ["Web servers"],
      "headers": {"server": r"Microsoft-IIS(?:/([\d.]+))?"}},
-    {"name": "LiteSpeed", "cats": ["Web servers"],
+    {"name": "LiteSpeed", "cats": ["Web servers", "Hosting"],
      "headers": {"server": r"LiteSpeed"}},
     {"name": "Caddy", "cats": ["Web servers"],
      "headers": {"server": r"Caddy"}},
-    {"name": "Amazon S3", "cats": ["CDN", "PaaS"],
-     "headers": {"server": r"AmazonS3", "x-amz-request-id": r".+"}},
-    {"name": "Google Cloud", "cats": ["PaaS"],
+    {"name": "Amazon S3", "cats": ["Hosting", "PaaS"],
+     "headers": {"server": r"AmazonS3"}},
+    {"name": "Google Cloud", "cats": ["Hosting", "PaaS"],
      "headers": {"via": r"google", "server": r"Google Frontend"}},
     {"name": "AWS ELB", "cats": ["Load balancers"],
      "headers": {"server": r"awselb"}},
 
-    # Payments / widgets
     {"name": "Stripe", "cats": ["Payment processors"],
-     "html": [r"js\.stripe\.com", r"stripe\.com/v3"]},
+     "html": [r"js\.stripe\.com", r"js\.stripe\.com/v3"]},
     {"name": "PayPal", "cats": ["Payment processors"],
      "html": [r"paypal\.com/sdk", r"paypalobjects\.com"]},
     {"name": "reCAPTCHA", "cats": ["Security"],
-     "html": [r"www\.google\.com/recaptcha", r"grecaptcha"]},
+     "html": [r"google\.com/recaptcha", r"grecaptcha"]},
     {"name": "hCaptcha", "cats": ["Security"],
      "html": [r"hcaptcha\.com"]},
     {"name": "Cloudflare Turnstile", "cats": ["Security"],
      "html": [r"challenges\.cloudflare\.com/turnstile"]},
-
-    # Media / other
     {"name": "YouTube", "cats": ["Video players"],
      "html": [r"youtube\.com/embed", r"youtube-nocookie\.com"]},
     {"name": "Vimeo", "cats": ["Video players"],
@@ -215,11 +225,36 @@ FINGERPRINTS = [
      "html": [r"disqus\.com"]},
 ]
 
+IMPLIES = {
+    "WordPress": ["PHP", "MySQL"],
+    "WooCommerce": ["WordPress", "PHP", "MySQL"],
+    "Yoast SEO": ["WordPress"],
+    "Elementor": ["WordPress"],
+    "Contact Form 7": ["WordPress"],
+    "Jetpack": ["WordPress"],
+    "Gravity Forms": ["WordPress"],
+    "WP Rocket": ["WordPress"],
+    "Laravel": ["PHP"],
+    "Django": ["Python"],
+    "Flask": ["Python"],
+    "Ruby on Rails": ["Ruby"],
+    "Next.js": ["React", "Node.js"],
+    "Nuxt.js": ["Vue.js", "Node.js"],
+    "Express": ["Node.js"],
+    "SvelteKit": ["Svelte", "Node.js"],
+    "Gatsby": ["React", "Node.js"],
+    "ASP.NET": ["IIS"],
+}
+
+KNOWN_NAMES = {fp["name"] for fp in FINGERPRINTS}
+CATS_BY_NAME = {fp["name"]: fp["cats"] for fp in FINGERPRINTS}
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
+
+PLUGIN_SLUG_RE = re.compile(r"/wp-content/plugins/([a-zA-Z0-9_-]+)/", re.I)
 
 
 def normalize_url(raw: str) -> str:
@@ -271,7 +306,7 @@ def extract_page_signals(html: str, base_url: str) -> dict:
 
 
 def match_patterns(text: str, patterns) -> tuple[bool, str]:
-    if not text:
+    if not text or not patterns:
         return False, ""
     for pat in patterns:
         m = re.search(pat, text, re.I | re.S)
@@ -279,6 +314,45 @@ def match_patterns(text: str, patterns) -> tuple[bool, str]:
             ver = m.group(1) if m.lastindex else ""
             return True, ver or ""
     return False, ""
+
+
+def humanize_slug(slug: str) -> str:
+    return slug.replace("-", " ").replace("_", " ").title()
+
+
+def discover_wp_plugins(html: str) -> list[dict]:
+    slugs = sorted(set(PLUGIN_SLUG_RE.findall(html)))
+    out = []
+    for slug in slugs:
+        name = humanize_slug(slug)
+        if name in KNOWN_NAMES:
+            continue
+        out.append({
+            "name": name,
+            "categories": ["WordPress plugins"],
+            "version": "",
+            "confidence": 80,
+            "evidence": [f"path wp-content/plugins/{slug}"],
+        })
+    return out
+
+
+def apply_implies(found: dict) -> dict:
+    changed = True
+    while changed:
+        changed = False
+        for name in list(found):
+            for implied in IMPLIES.get(name, []):
+                if implied not in found:
+                    found[implied] = {
+                        "name": implied,
+                        "categories": CATS_BY_NAME.get(implied, ["Inferred"]),
+                        "version": "",
+                        "confidence": 60,
+                        "evidence": [f"implied by {name}"],
+                    }
+                    changed = True
+    return found
 
 
 def detect(page: dict) -> list[dict]:
@@ -305,15 +379,17 @@ def detect(page: dict) -> list[dict]:
 
         if "cookies" in fp:
             for cname, pat in fp["cookies"].items():
-                # cookie names often appear with prefixes
                 matched_cookie = None
                 for existing in cookies:
                     if existing.lower() == cname.lower() or existing.lower().startswith(cname.lower()):
                         matched_cookie = existing
                         break
                 if matched_cookie is not None:
-                    ok, ver = match_patterns(cookies[matched_cookie], [pat]) if pat != r".+" else (True, "")
-                    if ok or pat == r".+":
+                    if pat == r".+":
+                        ok, ver = True, ""
+                    else:
+                        ok, ver = match_patterns(cookies[matched_cookie], [pat])
+                    if ok:
                         hits += 1
                         version = version or ver
                         reasons.append(f"cookie {matched_cookie}")
@@ -342,10 +418,9 @@ def detect(page: dict) -> list[dict]:
 
         if hits:
             confidence = min(100, 50 + hits * 25)
-            key = fp["name"]
-            prev = found.get(key)
+            prev = found.get(fp["name"])
             if not prev or confidence > prev["confidence"]:
-                found[key] = {
+                found[fp["name"]] = {
                     "name": fp["name"],
                     "categories": fp["cats"],
                     "version": version,
@@ -353,6 +428,10 @@ def detect(page: dict) -> list[dict]:
                     "evidence": reasons,
                 }
 
+    for plugin in discover_wp_plugins(html):
+        found.setdefault(plugin["name"], plugin)
+
+    found = apply_implies(found)
     return sorted(found.values(), key=lambda x: (-x["confidence"], x["name"].lower()))
 
 
@@ -364,9 +443,19 @@ def group_by_category(techs: list[dict]) -> dict:
     return dict(sorted(grouped.items(), key=lambda kv: kv[0].lower()))
 
 
-# ---------------------------------------------------------------------------
-# UI
-# ---------------------------------------------------------------------------
+def friendly_request_error(exc: Exception) -> str:
+    text = str(exc)
+    if "NameResolutionError" in text or "Failed to resolve" in text or "Name or service not known" in text:
+        host = ""
+        m = re.search(r"host='([^']+)'", text)
+        if m:
+            host = m.group(1)
+        return (
+            f"The hostname `{host or 'entered'}` could not be resolved. "
+            "Check the spelling (this is a DNS miss, not a detector failure)."
+        )
+    return f"Could not fetch the site: {exc}"
+
 
 st.markdown(
     """
@@ -383,7 +472,10 @@ st.markdown(
 )
 
 st.title("🔍 StackLens")
-st.caption("Wappalyzer-style technology detection from public HTTP headers, HTML, cookies, and scripts.")
+st.caption(
+    "Detects CMS, plugins, languages, frameworks, hosting, CDN, analytics, "
+    "and inferred databases from public headers, HTML, cookies, and scripts."
+)
 
 col_in, col_btn = st.columns([4, 1])
 with col_in:
@@ -397,6 +489,24 @@ with col_btn:
 
 with st.expander("Options"):
     timeout = st.slider("Request timeout (seconds)", 5, 40, 20)
+    focus = st.multiselect(
+        "Show only these category groups (optional)",
+        [
+            "Programming languages",
+            "Databases",
+            "CMS",
+            "WordPress plugins",
+            "Web frameworks",
+            "JavaScript frameworks",
+            "Hosting",
+            "CDN",
+            "PaaS",
+            "Web servers",
+            "Analytics",
+            "Ecommerce",
+            "Security",
+        ],
+    )
 
 if run and url_input.strip():
     url = normalize_url(url_input)
@@ -415,10 +525,13 @@ if run and url_input.strip():
             st.error("Request timed out.")
             st.stop()
         except requests.RequestException as e:
-            st.error(f"Could not fetch the site: {e}")
+            st.error(friendly_request_error(e))
             st.stop()
 
     techs = detect(page)
+    if focus:
+        techs = [t for t in techs if any(c in focus for c in t["categories"])]
+
     grouped = group_by_category(techs)
     signals = extract_page_signals(page["html"], page["final_url"])
 
@@ -433,7 +546,7 @@ if run and url_input.strip():
         st.write(f"**Title:** {signals['title']}")
 
     if not techs:
-        st.warning("No known technologies matched. The site may hide fingerprints, block bots, or use uncommon tools.")
+        st.warning("No known technologies matched for the current filters.")
     else:
         tabs = st.tabs(["By category", "All technologies", "Raw signals"])
 
@@ -483,4 +596,8 @@ if run and url_input.strip():
 elif run:
     st.warning("Enter a URL first.")
 else:
-    st.info("Enter any public website and click **Analyze**. Detection uses only publicly visible headers, HTML, cookies, and script URLs — same idea as Wappalyzer’s server-side scan.")
+    st.info(
+        "Enter a public website and click **Analyze**. "
+        "Languages and databases that are not leaked in public responses are inferred "
+        "(for example WordPress → PHP + MySQL)."
+    )
