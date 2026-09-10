@@ -1,0 +1,12 @@
+# StackLens — Streamlit Community Cloud
+# Select Python 3.13 in the Streamlit Cloud deploy settings.
+# Compatible with CPython 3.13.
+
+streamlit>=1.54.0,<2
+requests>=2.32.0,<3
+beautifulsoup4>=4.12.3,<5
+lxml>=5.3.0,<6
+urllib3>=2.2.0,<3
+charset-normalizer>=3.3.2,<4
+idna>=3.10,<4
+certifi>=2024.8.30
